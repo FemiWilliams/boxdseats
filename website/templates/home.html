@@ -2,15 +2,13 @@
 
 {% block content %}
 <form method="POST">
-
-    <h3 align="center"> BoxdSeats </h3>
     <div class="form-group">
-        <label for="firstAccount">First Account</label>
-        <input type="text" class="form-control" id="firstAccount" name="firstAccount" placeholder="Enter first account"/>
+        <label for="firstAccount"><b>First Account</b></label>
+        <input type="text" class="form-control" id="firstAccount" name="firstAccount" placeholder="Enter a valid letterboxd account"/>
     </div>
     <div class="form-group">
-        <label for="secondAccount">Second Account</label>
-        <input type="text" class="form-control" id="secondAccount" name="secondAccount" placeholder="Enter second account"/>
+        <label for="secondAccount"><b>Second Account</b></label>
+        <input type="text" class="form-control" id="secondAccount" name="secondAccount" placeholder="Enter a valid letterboxd account"/>
     </div>
     <br />
     <button type="submit" class="btn btn-primary">Compare!</button>
@@ -19,7 +17,12 @@
 <ul class="list-group list-group-flush" id="titles">
     {% for title in intersection %}
     <li class="list-group-item">
-      {{ title }}
+      <img src = {{title['image']}} />
+     <b>
+      <a href= {{title['url']}}>
+      {{ title['Title'] }}
+    </a>
+    </b>
     </li>
     {% endfor %}
   </ul>

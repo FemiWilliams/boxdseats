@@ -6,11 +6,10 @@
 #step 2
 #get the data-film-name and display that in cmd instead of entire div/class
 
-import time, webbrowser, requests, bs4, os.path
+import time, requests, bs4
 
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 
 class Boxer:
 
@@ -19,38 +18,76 @@ class Boxer:
 
     def get_watchlist(self, user):
 
-        url = "/".join(["https://letterboxd.com/",user,"watchlist/"])
+        base_url = "https://letterboxd.com"
+        url = "/".join([base_url ,user,"watchlist/"])
         res = requests.get(url)
-        watchlist_page = bs4.BeautifulSoup(res.text, 'html.parser')
 
+        options = Options()
+        options.add_argument('--headless')
+        options.add_argument('--disable-gpu')
+        browser = webdriver.Chrome(options = options)
+        browser.get(url)
+        time.sleep(0.5)
+        source = browser.page_source
+        
+        if res.status_code >= 400:
+            return None
+
+        watchlist_page = bs4.BeautifulSoup(source, 'lxml')
         titles = []
 
-        first_page_list = watchlist_page.find_all("div", class_= "film-poster")
+        first_page_list = watchlist_page.find_all("li", class_= "poster-container")
+
+        if len(first_page_list) < 1:
+            return None
 
         for title in first_page_list:
-            title_details = {'Title': title.img['alt']}
+
+            title_details = {'Title': title.a.text}
+
+            title_url = title.div['data-film-link']
+            title_url = "".join([base_url, title_url])
+            title_details['url'] = title_url
+
+            title_details['image'] = title.img['src']
 
             titles.append(title_details)
 
+        pages = watchlist_page.find_all("li", class_="paginate-page")
+        if not pages: 
+            return titles
 
-        last_page = int(watchlist_page.find_all("li", class_="paginate-page")[-1].get_text())
+        last_page = int(pages[-1].get_text())
 
         for page in range(2,last_page + 1):
-            current_page = '/'.join([url,"page",str(page)])
-            res = requests.get(current_page)
-            watchlist_page = bs4.BeautifulSoup(res.text, 'html.parser')
+            
+            current_page = ''.join([url,"page/",str(page)])
+            #res = requests.get(current_page)
+            browser.get(current_page)
+            time.sleep(0.5)
+            source = browser.page_source
+            watchlist_page = bs4.BeautifulSoup(source, 'lxml')
 
-            current_page_list = watchlist_page.find_all("div", class_="film-poster")
+            current_page_list = watchlist_page.find_all("li", class_="poster-container")
 
             for title in current_page_list:
-                title_details = {'Title': title.img['alt']}
+                title_details = {'Title': title.a.text}
+
+                title_url = title.div['data-film-link']
+                title_url = "".join([base_url, title_url])
+                title_details['url'] = title_url
+
+                title_details['image'] = title.img['src']
+
 
                 titles.append(title_details)
+       
+        browser.quit()
         return titles
 
     def find_intersection(self, list1, list2):
         
-        intersection = [first_title['Title'] for first_title in list1 if any(second_title['Title'] == first_title["Title"] for second_title in list2)]
+        intersection = [first_title for first_title in list1 if any(second_title['Title'] == first_title["Title"] for second_title in list2)]
         
 
         '''
@@ -75,4 +112,4 @@ if __name__ == "__main__":
     print("Neither of you has seen:\n")
 
     for movie in neither_seen:
-        print(f"{movie} \n")
+        print(f"{movie['Title']} \n")
