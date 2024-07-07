@@ -1,7 +1,7 @@
 {% extends "base.html" %} 
 
 {% block content %}
-<form method="POST">
+<form class="boxseats__form" method="POST">
     <div class="form-group">
         <label for="firstAccount"><b>First Account</b></label>
         <input type="text" class="form-control" id="firstAccount" name="firstAccount" placeholder="Enter a valid letterboxd account"/>
@@ -11,7 +11,11 @@
         <input type="text" class="form-control" id="secondAccount" name="secondAccount" placeholder="Enter a valid letterboxd account"/>
     </div>
     <br />
-    <button type="submit" class="btn btn-primary">Compare!</button>
+    <button type="submit" class="btn boxseats__submit btn-primary">
+      <span class="boxseats__submit--indicator d-none spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      <span class="boxseats__submit--label visually-hidden">Compare!</span>
+    </button>
+
 </form>
 
 <ul class="list-group list-group-flush" id="titles">

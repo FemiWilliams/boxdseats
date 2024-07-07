@@ -23,11 +23,13 @@ class Boxer:
         res = requests.get(url)
 
         options = Options()
-        options.add_argument('--headless')
+        options.add_argument('--headless=new')
         options.add_argument('--disable-gpu')
-        browser = webdriver.Chrome(options = options)
+        options.add_argument('--disable-dev-shm-usage')
+        options.add_argument("--no-sandbox")
+        browser = webdriver.Chrome(options)
         browser.get(url)
-        time.sleep(0.5)
+        time.sleep(0.4)
         source = browser.page_source
         
         if res.status_code >= 400:
@@ -62,9 +64,8 @@ class Boxer:
         for page in range(2,last_page + 1):
             
             current_page = ''.join([url,"page/",str(page)])
-            #res = requests.get(current_page)
             browser.get(current_page)
-            time.sleep(0.5)
+            time.sleep(0.4)
             source = browser.page_source
             watchlist_page = bs4.BeautifulSoup(source, 'lxml')
 
@@ -88,12 +89,6 @@ class Boxer:
     def find_intersection(self, list1, list2):
         
         intersection = [first_title for first_title in list1 if any(second_title['Title'] == first_title["Title"] for second_title in list2)]
-        
-
-        '''
-        for title in list1:
-            print(title['Title'])
-        '''
         
         return intersection
 
